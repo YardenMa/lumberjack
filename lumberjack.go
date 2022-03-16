@@ -165,18 +165,19 @@ func (l *Logger) Write(p []byte) (n int, err error) {
 func (l *Logger) Close() error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	return l.close()
+	err := l.close()
+
+	if l.millCh != nil {
+                close(l.millCh)
+                l.millCh = nil
+        }
+	return err
 }
 
 // close closes the file if it is open.
 func (l *Logger) close() error {
 	if l.file == nil {
 		return nil
-	}
-
-	if l.millCh != nil {
-		close(l.millCh)
-		l.millCh = nil
 	}
 
 	err := l.file.Close()
